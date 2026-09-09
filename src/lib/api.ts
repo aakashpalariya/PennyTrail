@@ -11,6 +11,7 @@ export interface AppUser {
   id: string;
   name: string;
   email: string;
+  dob?: string;
   avatarEmoji: string;
   currency: string;
   isActive: boolean;
@@ -68,11 +69,17 @@ export const apiClient = {
       if (!res.ok) throw new Error(data.error ?? 'Login failed');
       return data.user;
     },
-    async register(name: string, email: string, password: string, currency?: string): Promise<AppUser> {
-      const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, currency }) });
+    async register(name: string, email: string, password: string, dob?: string, currency?: string): Promise<AppUser> {
+      const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password, dob, currency }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Registration failed');
       return data.user;
+    },
+    async resetPassword(email: string, dob: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+      const res = await fetch('/api/auth/reset-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, dob, newPassword }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Password reset failed');
+      return data;
     },
     async updateProfile(userId: string, updates: Partial<Pick<AppUser, 'name' | 'avatarEmoji' | 'currency'>>): Promise<AppUser> {
       const res = await fetch(`/api/auth/users/${userId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });

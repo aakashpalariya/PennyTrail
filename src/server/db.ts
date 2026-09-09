@@ -13,6 +13,7 @@ export interface DBUser {
   name: string;
   email: string;
   passwordHash: string;
+  dob?: string;
   avatarEmoji: string;
   currency: string;
   isActive: boolean;
@@ -110,6 +111,26 @@ function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+export function normalizeDob(dob?: string): string {
+  if (!dob) return '';
+  const clean = dob.trim();
+  const dmYMatch = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/);
+  if (dmYMatch) {
+    const day = dmYMatch[1].padStart(2, '0');
+    const month = dmYMatch[2].padStart(2, '0');
+    const year = dmYMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+  const YmdMatch = clean.match(/^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})$/);
+  if (YmdMatch) {
+    const year = YmdMatch[1];
+    const month = YmdMatch[2].padStart(2, '0');
+    const day = YmdMatch[3].padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  return clean;
+}
+
 // ─── Row Mappers ─────────────────────────────────────────────────────────────
 
 function mapUser(row: Row): DBUser {
@@ -118,6 +139,7 @@ function mapUser(row: Row): DBUser {
     name: String(row.name),
     email: String(row.email),
     passwordHash: String(row.password_hash),
+    dob: row.dob ? String(row.dob) : '2001-01-01',
     currency: String(row.currency || 'INR'),
     avatarEmoji: String(row.avatar_emoji || '👤'),
     isActive: Number(row.is_active) === 1,
@@ -206,6 +228,7 @@ export class PennyTrailSQLiteDB {
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+        dob TEXT NOT NULL DEFAULT '2001-01-01',
         currency TEXT NOT NULL DEFAULT 'INR',
         avatar_emoji TEXT NOT NULL DEFAULT '👤',
         is_active INTEGER NOT NULL DEFAULT 1,
@@ -213,6 +236,12 @@ export class PennyTrailSQLiteDB {
         updated_at TEXT NOT NULL
       );
     `);
+
+    try {
+      await this.client.execute(`ALTER TABLE users ADD COLUMN dob TEXT NOT NULL DEFAULT '2001-01-01';`);
+    } catch {
+      // Column might already exist
+    }
 
     await this.client.execute(`
       CREATE TABLE IF NOT EXISTS categories (
@@ -277,10 +306,77 @@ export class PennyTrailSQLiteDB {
     await this.client.execute(`CREATE INDEX IF NOT EXISTS idx_expenses_cat ON expenses(category_id);`);
     await this.client.execute(`CREATE INDEX IF NOT EXISTS idx_budgets_user_month ON budgets(user_id, month);`);
 
-    // 3. Migrate from existing JSON DB file if present
-    await this.migrateFromJsonIfAvailable();
+    // 3. Reset existing data to fresh default state if fresh seed not marked
+    const freshSeedCheck = await this.client.execute(`SELECT value FROM system_config WHERE key = 'fresh_default_seed_v3';`);
+    if (freshSeedCheck.rows.length === 0) {
+      await this.client.execute(`DELETE FROM expenses;`);
+      await this.client.execute(`DELETE FROM budgets;`);
+      await this.client.execute(`DELETE FROM categories WHERE user_id != 'global';`);
+      await this.client.execute(`DELETE FROM users;`);
 
-    // 4. Ensure default global categories exist
+      const now = new Date().toISOString();
+      for (const c of DEFAULT_CATEGORIES) {
+        await this.client.execute({
+          sql: `INSERT OR REPLACE INTO categories (id, user_id, name, icon, color, is_default, is_active, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [c.id, c.userId, c.name, c.icon, c.color, c.isDefault ? 1 : 0, c.isActive !== false ? 1 : 0, now],
+        });
+      }
+
+      // Seed Default Demo User: demo@pennytrail.app / Demo@123 / DOB 01/01/2001
+      const demoEmail = 'demo@pennytrail.app';
+      const demoPassHash = hashPassword('Demo@123');
+      const demoDob = '2001-01-01';
+
+      await this.client.execute({
+        sql: `INSERT OR REPLACE INTO users (id, name, email, password_hash, dob, currency, avatar_emoji, is_active, created_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
+        args: ['demo-user-id', 'Demo User', demoEmail, demoPassHash, demoDob, 'INR', '👤', now, now],
+      });
+
+      await this.client.execute({
+        sql: `INSERT OR REPLACE INTO system_config (key, value) VALUES ('fresh_default_seed_v3', ?);`,
+        args: [now],
+      });
+
+      try {
+        const cleanJson = {
+          users: [
+            {
+              id: 'demo-user-id',
+              name: 'Demo User',
+              email: demoEmail,
+              passwordHash: demoPassHash,
+              dob: demoDob,
+              avatarEmoji: '👤',
+              currency: 'INR',
+              isActive: true,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+          expenses: [],
+          categories: DEFAULT_CATEGORIES.map(c => ({ ...c, createdAt: now })),
+          budgets: [],
+        };
+        fs.writeFileSync(this.paths.jsonFilePath, JSON.stringify(cleanJson, null, 2));
+      } catch {
+        // ignore json sync error
+      }
+    }
+
+    // Ensure demo user exists
+    const demoCheck = await this.client.execute(`SELECT id FROM users WHERE LOWER(email) = 'demo@pennytrail.app' LIMIT 1;`);
+    if (demoCheck.rows.length === 0) {
+      const now = new Date().toISOString();
+      await this.client.execute({
+        sql: `INSERT OR REPLACE INTO users (id, name, email, password_hash, dob, currency, avatar_emoji, is_active, created_at, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
+        args: ['demo-user-id', 'Demo User', 'demo@pennytrail.app', hashPassword('Demo@123'), '2001-01-01', 'INR', '👤', now, now],
+      });
+    }
+
+    // Ensure default global categories exist
     const catCheck = await this.client.execute(`SELECT COUNT(*) as count FROM categories WHERE user_id = 'global';`);
     const globalCatCount = Number(catCheck.rows[0]?.count ?? 0);
     if (globalCatCount === 0) {
@@ -443,6 +539,7 @@ export class PennyTrailSQLiteDB {
     name: string;
     email: string;
     password: string;
+    dob?: string;
     currency?: string;
     avatarEmoji?: string;
   }): Promise<DBUser> {
@@ -452,11 +549,12 @@ export class PennyTrailSQLiteDB {
     const currency = input.currency || 'INR';
     const avatarEmoji = input.avatarEmoji || '👤';
     const passwordHash = hashPassword(input.password);
+    const dob = normalizeDob(input.dob || '2001-01-01');
 
     await this.client.execute({
-      sql: `INSERT INTO users (id, name, email, password_hash, currency, avatar_emoji, is_active, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?);`,
-      args: [id, input.name.trim(), input.email.toLowerCase().trim(), passwordHash, currency, avatarEmoji, now, now],
+      sql: `INSERT INTO users (id, name, email, password_hash, dob, currency, avatar_emoji, is_active, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
+      args: [id, input.name.trim(), input.email.toLowerCase().trim(), passwordHash, dob, currency, avatarEmoji, now, now],
     });
 
     return {
@@ -464,12 +562,36 @@ export class PennyTrailSQLiteDB {
       name: input.name.trim(),
       email: input.email.toLowerCase().trim(),
       passwordHash,
+      dob,
       avatarEmoji,
       currency,
       isActive: true,
       createdAt: now,
       updatedAt: now,
     };
+  }
+
+  async resetPasswordByDob(email: string, dob: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    await this.ready();
+    const user = await this.findUserByEmail(email);
+    if (!user) {
+      return { success: false, error: 'No account found with this email address.' };
+    }
+
+    const inputDob = normalizeDob(dob);
+    const userDob = normalizeDob(user.dob);
+
+    if (!inputDob || !userDob || inputDob !== userDob) {
+      return { success: false, error: 'Date of birth does not match our records.' };
+    }
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return { success: false, error: 'New password must be at least 6 characters.' };
+    }
+
+    const newHash = hashPassword(newPassword.trim());
+    await this.updateUser(user.id, { passwordHash: newHash });
+    return { success: true };
   }
 
   async updateUser(
@@ -898,7 +1020,7 @@ export class PennyTrailSQLiteDB {
 
   async adminUpdateUser(
     userId: string,
-    updates: { name?: string; email?: string; currency?: string; newPassword?: string; isActive?: boolean }
+    updates: { name?: string; email?: string; dob?: string; currency?: string; newPassword?: string; isActive?: boolean }
   ): Promise<DBUser | undefined> {
     await this.ready();
     const existing = await this.findUserById(userId);
@@ -906,6 +1028,7 @@ export class PennyTrailSQLiteDB {
 
     const name = updates.name !== undefined ? updates.name.trim() : existing.name;
     const email = updates.email !== undefined ? updates.email.toLowerCase().trim() : existing.email;
+    const dob = updates.dob !== undefined ? normalizeDob(updates.dob) : (existing.dob || '2001-01-01');
     const currency = updates.currency !== undefined ? updates.currency : existing.currency;
     const isActive = updates.isActive !== undefined ? updates.isActive : existing.isActive;
     const passwordHash = updates.newPassword && updates.newPassword.trim().length >= 6
@@ -915,9 +1038,9 @@ export class PennyTrailSQLiteDB {
 
     await this.client.execute({
       sql: `UPDATE users
-            SET name = ?, email = ?, currency = ?, is_active = ?, password_hash = ?, updated_at = ?
+            SET name = ?, email = ?, dob = ?, currency = ?, is_active = ?, password_hash = ?, updated_at = ?
             WHERE id = ?;`,
-      args: [name, email, currency, isActive ? 1 : 0, passwordHash, updatedAt, userId],
+      args: [name, email, dob, currency, isActive ? 1 : 0, passwordHash, updatedAt, userId],
     });
 
     if (updates.currency) {
@@ -935,6 +1058,7 @@ export class PennyTrailSQLiteDB {
       ...existing,
       name,
       email,
+      dob,
       currency,
       isActive,
       passwordHash,

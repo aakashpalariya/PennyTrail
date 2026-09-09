@@ -3,11 +3,11 @@ import { serverDb } from '@/server/db';
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, currency } = await req.json();
-    if (!name || !email || !password) return NextResponse.json({ error: 'All fields required' }, { status: 400 });
+    const { name, email, password, dob, currency } = await req.json();
+    if (!name || !email || !password || !dob) return NextResponse.json({ error: 'All fields including Date of Birth are required' }, { status: 400 });
     if (password.length < 6) return NextResponse.json({ error: 'Password must be at least 6 characters.' }, { status: 400 });
 
-    const user = await serverDb.createUser({ name, email, password, currency });
+    const user = await serverDb.createUser({ name, email, password, dob, currency });
     const { passwordHash: _, ...safeUser } = user;
     return NextResponse.json({ user: safeUser }, { status: 201 });
   } catch (err) {

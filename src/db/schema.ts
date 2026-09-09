@@ -15,6 +15,7 @@ export interface AppUser {
   name: string;
   email: string;
   passwordHash: string; // bcrypt-style hash (we use a simple hash since local-only)
+  dob?: string; // Date of birth (YYYY-MM-DD or DD/MM/YYYY)
   avatarEmoji?: string; // e.g. "🐱"
   currency: string; // 'INR' | 'USD' etc.
   role: UserRole;

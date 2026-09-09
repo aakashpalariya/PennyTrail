@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Calendar } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -17,13 +17,14 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [dob, setDob] = useState('');
   const [currency, setCurrency] = useState('INR');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; dob?: string; general?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
-    const errs: { name?: string; email?: string; password?: string } = {};
+    const errs: { name?: string; email?: string; password?: string; dob?: string } = {};
     if (!name.trim()) {
       errs.name = 'Please enter your name';
     }
@@ -37,6 +38,9 @@ export default function RegisterPage() {
     } else if (password.length < 6) {
       errs.password = 'Password must be at least 6 characters';
     }
+    if (!dob) {
+      errs.dob = 'Please select your Date of Birth';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -48,7 +52,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await register(name, email, password, currency);
+      await register(name, email, password, dob, currency);
       router.replace('/dashboard');
     } catch (err) {
       setErrors({ general: err instanceof Error ? err.message : 'Registration failed' });
@@ -96,6 +100,18 @@ export default function RegisterPage() {
             error={errors.email}
             leftElement={<Mail size={16} />}
             autoComplete="email"
+          />
+
+          <Input
+            label="Date of Birth (Used for password reset)"
+            type="date"
+            value={dob}
+            onChange={e => {
+              setDob(e.target.value);
+              if (errors.dob) setErrors(prev => ({ ...prev, dob: '' }));
+            }}
+            error={errors.dob}
+            leftElement={<Calendar size={16} />}
           />
 
           <Input

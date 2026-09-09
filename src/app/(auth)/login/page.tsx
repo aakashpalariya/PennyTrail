@@ -104,28 +104,35 @@ export default function LoginPage() {
             autoComplete="email"
           />
 
-          <Input
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="••••••••"
-            value={password}
-            onChange={e => {
-              setPassword(e.target.value);
-              if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
-            }}
-            error={errors.password}
-            leftElement={<Lock size={16} />}
-            rightElement={
-              <button
-                type="button"
-                onClick={() => setShowPassword(v => !v)}
-                className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            }
-            autoComplete="current-password"
-          />
+          <div>
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              value={password}
+              onChange={e => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+              }}
+              error={errors.password}
+              leftElement={<Lock size={16} />}
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              }
+              autoComplete="current-password"
+            />
+            <div className="flex justify-end mt-1">
+              <Link href="/forgot-password" className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+          </div>
 
           {errors.general && (
             <div className="rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-4 py-3 text-xs font-semibold text-red-700 dark:text-red-300">

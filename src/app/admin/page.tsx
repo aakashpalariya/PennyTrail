@@ -25,12 +25,13 @@ import {
   Power,
   Tag,
   AlertTriangle,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/context/ToastContext';
 import { useTheme } from '@/context/ThemeContext';
 import { formatAmount } from '@/domain/currency';
-import { formatDate } from '@/domain/formatters';
+import { formatDate, formatDobDisplay } from '@/domain/formatters';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -42,6 +43,7 @@ interface AdminUser {
   id: string;
   name: string;
   email: string;
+  dob?: string;
   currency: string;
   avatarEmoji: string;
   isActive: boolean;
@@ -109,6 +111,7 @@ export default function AdminPage() {
   const [editTarget, setEditTarget] = useState<AdminUser | null>(null);
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [editDob, setEditDob] = useState('');
   const [editCurrency, setEditCurrency] = useState('INR');
   const [editPassword, setEditPassword] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -117,6 +120,7 @@ export default function AdminPage() {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [addName, setAddName] = useState('');
   const [addEmail, setAddEmail] = useState('');
+  const [addDob, setAddDob] = useState('2001-01-01');
   const [addPassword, setAddPassword] = useState('');
   const [addCurrency, setAddCurrency] = useState('INR');
   const [isCreatingUser, setIsCreatingUser] = useState(false);
@@ -240,6 +244,7 @@ export default function AdminPage() {
     setEditTarget(u);
     setEditName(u.name);
     setEditEmail(u.email);
+    setEditDob(u.dob || '2001-01-01');
     setEditCurrency(u.currency || 'INR');
     setEditPassword('');
     setEditErrors({});
@@ -283,6 +288,7 @@ export default function AdminPage() {
       const payload: Record<string, string> = {
         name: trimmedName,
         email: trimmedEmail,
+        dob: editDob || '2001-01-01',
         currency: editCurrency,
       };
       if (editPassword.trim()) {
@@ -352,6 +358,7 @@ export default function AdminPage() {
           name: trimmedName,
           email: trimmedEmail,
           password: addPassword.trim(),
+          dob: addDob || '2001-01-01',
           currency: addCurrency,
         }),
       });
@@ -615,19 +622,6 @@ export default function AdminPage() {
             </Button>
           </form>
 
-          {/* Default Password Hint */}
-          <div className="mt-6 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 text-xs">
-            <p className="font-bold flex items-center gap-1">
-              <Lock size={13} /> Default Admin Credentials:
-            </p>
-            <p className="mt-1">
-              Default Password: <code className="bg-white/80 dark:bg-black/40 px-1.5 py-0.5 rounded font-mono font-bold">Admin@12345</code>
-            </p>
-            <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-1">
-              (You can change this password inside the admin security tab anytime).
-            </p>
-          </div>
-
           <div className="mt-5 text-center">
             <Link
               href="/dashboard"
@@ -664,6 +658,14 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          {/* Go to App button */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Go to App
+          </Link>
+
           {/* Refresh button */}
           <button
             type="button"
@@ -792,6 +794,11 @@ export default function AdminPage() {
                           </span>
                         </div>
                         <p className="text-xs text-neutral-400 truncate mt-0.5">{u.email}</p>
+                        {u.dob && (
+                          <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-1">
+                            <Calendar size={12} /> DOB: {formatDobDisplay(u.dob)}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -1096,6 +1103,13 @@ export default function AdminPage() {
             error={editErrors.email}
           />
 
+          <Input
+            label="Date of Birth"
+            type="date"
+            value={editDob}
+            onChange={e => setEditDob(e.target.value)}
+          />
+
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-2">
               Currency
@@ -1183,6 +1197,14 @@ export default function AdminPage() {
               if (addErrors.email) setAddErrors(prev => ({ ...prev, email: undefined }));
             }}
             error={addErrors.email}
+            required
+          />
+
+          <Input
+            label="Date of Birth"
+            type="date"
+            value={addDob}
+            onChange={e => setAddDob(e.target.value)}
             required
           />
 

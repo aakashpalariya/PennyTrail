@@ -8,6 +8,34 @@ export function formatDate(dateStr: string): string {
   return format(date, 'd MMM yyyy');
 }
 
+export function formatDobDisplay(dob?: string): string {
+  if (!dob) return '';
+  const clean = dob.trim();
+  // Try YYYY-MM-DD
+  const ymd = clean.match(/^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})$/);
+  if (ymd) {
+    const year = parseInt(ymd[1], 10);
+    const month = parseInt(ymd[2], 10) - 1;
+    const day = parseInt(ymd[3], 10);
+    const date = new Date(year, month, day);
+    if (!isNaN(date.getTime())) {
+      return format(date, 'MMM d, yyyy');
+    }
+  }
+  // Try DD/MM/YYYY
+  const dmy = clean.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{4})$/);
+  if (dmy) {
+    const day = parseInt(dmy[1], 10);
+    const month = parseInt(dmy[2], 10) - 1;
+    const year = parseInt(dmy[3], 10);
+    const date = new Date(year, month, day);
+    if (!isNaN(date.getTime())) {
+      return format(date, 'MMM d, yyyy');
+    }
+  }
+  return clean;
+}
+
 export function formatDateShort(dateStr: string): string {
   return format(parseISO(dateStr), 'd MMM');
 }

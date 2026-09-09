@@ -1,127 +1,19 @@
 {
   "users": [
     {
-      "id": "mtikkng2rg2i3egu62",
-      "name": "Aakash Palariya",
-      "email": "aakashpalariya.one@gmail.com",
-      "passwordHash": "eccc279534f52bf49e2f08f99846e96edced95e57c5ae1f599d20c34c481ad87",
-      "avatarEmoji": "https://api.dicebear.com/9.x/adventurer/svg?seed=Ethan&backgroundColor=d1d4f9",
+      "id": "demo-user-id",
+      "name": "Demo User",
+      "email": "demo@pennytrail.app",
+      "passwordHash": "1426f4b478021525d77afac29119e1ea1d47413965451dab6e0b7b9a020465a5",
+      "dob": "2001-01-01",
+      "avatarEmoji": "👤",
       "currency": "INR",
       "isActive": true,
-      "createdAt": "2026-09-01T11:14:04.850Z",
-      "updatedAt": "2026-09-01T15:33:30.339Z"
-    },
-    {
-      "id": "mtioj1xa0d6n0ku9xre",
-      "name": "Jai Prakash",
-      "email": "jai@gmail.com",
-      "passwordHash": "04c91b05d0ca0eb738be7c6af94d68018601672e23d7d087cbc6a0537e6ee684",
-      "avatarEmoji": "💰",
-      "currency": "INR",
-      "isActive": true,
-      "createdAt": "2026-09-01T13:04:48.766Z",
-      "updatedAt": "2026-09-01T13:04:48.766Z"
-    },
-    {
-      "id": "mtiuln5pilurcrusv7",
-      "name": "Prakash",
-      "email": "prakash@gmail.com",
-      "passwordHash": "eccc279534f52bf49e2f08f99846e96edced95e57c5ae1f599d20c34c481ad87",
-      "avatarEmoji": "",
-      "currency": "INR",
-      "isActive": true,
-      "createdAt": "2026-09-01T15:54:47.293Z",
-      "updatedAt": "2026-09-01T15:54:47.293Z"
+      "createdAt": "2026-09-09T08:35:22.430Z",
+      "updatedAt": "2026-09-09T08:35:22.430Z"
     }
   ],
-  "expenses": [
-    {
-      "id": "mtiu0r5l10i92s5cp58l",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T15:38:32.697Z",
-      "updatedAt": "2026-09-01T15:38:32.697Z",
-      "title": "Petrol",
-      "amount": 200000,
-      "currency": "INR",
-      "categoryId": "cat-transport",
-      "paymentMethod": "CARD",
-      "date": "2026-08-20",
-      "isRecurring": false
-    },
-    {
-      "id": "mtiogxstwqy2exr6bx",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T13:03:10.109Z",
-      "updatedAt": "2026-09-01T13:03:21.702Z",
-      "title": "Horse Ride",
-      "amount": 4000,
-      "currency": "INR",
-      "categoryId": "mtiogdiinby5k3a07lq",
-      "paymentMethod": "CASH",
-      "date": "2026-09-04",
-      "isRecurring": false
-    },
-    {
-      "id": "mtint8znuiuk8fslop",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T12:44:44.867Z",
-      "updatedAt": "2026-09-01T14:40:05.997Z",
-      "title": "Game with Food",
-      "note": "Clash of Clan",
-      "amount": 30000,
-      "currency": "INR",
-      "categoryId": "cat-food",
-      "paymentMethod": "CASH",
-      "date": "2026-09-02",
-      "isRecurring": false
-    },
-    {
-      "id": "mtins8bllsq8r5f6lg8",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T12:43:57.345Z",
-      "updatedAt": "2026-09-01T12:43:57.345Z",
-      "title": "Park to Home",
-      "note": "Park to home",
-      "amount": 3400,
-      "currency": "INR",
-      "categoryId": "cat-transport",
-      "paymentMethod": "OTHER",
-      "date": "2026-09-01",
-      "isRecurring": false
-    },
-    {
-      "id": "mtimk5ne3at8b2vvyfq",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T12:09:41.018Z",
-      "updatedAt": "2026-09-01T12:20:06.846Z",
-      "title": "Bike fair to Office",
-      "amount": 12950,
-      "currency": "INR",
-      "categoryId": "cat-transport",
-      "paymentMethod": "NET_BANKING",
-      "date": "2026-09-03",
-      "isRecurring": false
-    },
-    {
-      "id": "mtil1vg03yuyr4bxapm",
-      "userId": "mtikkng2rg2i3egu62",
-      "isDeleted": false,
-      "createdAt": "2026-09-01T11:27:28.367Z",
-      "updatedAt": "2026-09-01T11:27:28.367Z",
-      "title": "Coffie",
-      "amount": 23400,
-      "currency": "INR",
-      "categoryId": "cat-food",
-      "paymentMethod": "CASH",
-      "date": "2026-09-01",
-      "isRecurring": false
-    }
-  ],
+  "expenses": [],
   "categories": [
     {
       "id": "cat-food",
@@ -130,7 +22,8 @@
       "icon": "🍽️",
       "color": "#f97316",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-transport",
@@ -139,7 +32,8 @@
       "icon": "🚗",
       "color": "#3b82f6",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-shopping",
@@ -148,7 +42,8 @@
       "icon": "🛍️",
       "color": "#ec4899",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-bills",
@@ -157,7 +52,8 @@
       "icon": "💡",
       "color": "#eab308",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-health",
@@ -166,7 +62,8 @@
       "icon": "🏥",
       "color": "#ef4444",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-entertain",
@@ -175,7 +72,8 @@
       "icon": "🎬",
       "color": "#8b5cf6",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-education",
@@ -184,7 +82,8 @@
       "icon": "📚",
       "color": "#06b6d4",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-groceries",
@@ -193,8 +92,8 @@
       "icon": "🛒",
       "color": "#84cc16",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z",
-      "isActive": true
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-travel",
@@ -203,7 +102,8 @@
       "icon": "✈️",
       "color": "#0ea5e9",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
+      "isActive": true,
+      "createdAt": "2026-09-09T08:35:22.430Z"
     },
     {
       "id": "cat-other",
@@ -212,69 +112,9 @@
       "icon": "📦",
       "color": "#6b7280",
       "isDefault": true,
-      "createdAt": "2026-09-01T11:13:14.210Z"
-    },
-    {
-      "id": "mtion2z17ewh0l91a8c",
-      "userId": "mtikkng2rg2i3egu62",
-      "name": "Games",
-      "icon": "🏀",
-      "color": "#10b981",
-      "isDefault": false,
-      "createdAt": "2026-09-01T13:07:56.749Z"
-    },
-    {
-      "id": "cat-mtiv8u4uph34kt5s8j",
-      "userId": "global",
-      "name": "Electronics",
-      "icon": "🖥️",
-      "color": "#f59e0b",
-      "isDefault": true,
       "isActive": true,
-      "createdAt": "2026-09-01T16:12:49.422Z"
+      "createdAt": "2026-09-09T08:35:22.430Z"
     }
   ],
-  "budgets": [
-    {
-      "id": "mtinm0t4wejmw4q55o",
-      "userId": "mtikkng2rg2i3egu62",
-      "month": "2026-09",
-      "categoryId": "global",
-      "amount": 500000,
-      "currency": "INR",
-      "createdAt": "2026-09-01T12:39:07.672Z",
-      "updatedAt": "2026-09-01T12:39:07.672Z"
-    },
-    {
-      "id": "mtinmtoo03na3d6d8tle",
-      "userId": "mtikkng2rg2i3egu62",
-      "month": "2026-09",
-      "categoryId": "cat-food",
-      "amount": 100000,
-      "currency": "INR",
-      "createdAt": "2026-09-01T12:39:45.096Z",
-      "updatedAt": "2026-09-01T12:39:45.096Z"
-    },
-    {
-      "id": "mtinmzmoq9vohp1tr9p",
-      "userId": "mtikkng2rg2i3egu62",
-      "month": "2026-09",
-      "categoryId": "cat-transport",
-      "amount": 100000,
-      "currency": "INR",
-      "createdAt": "2026-09-01T12:39:52.800Z",
-      "updatedAt": "2026-09-01T12:39:52.800Z"
-    },
-    {
-      "id": "mtiohyxfbjvmq4ve5xk",
-      "userId": "mtikkng2rg2i3egu62",
-      "month": "2026-09",
-      "categoryId": "mtiogdiinby5k3a07lq",
-      "amount": 10000,
-      "currency": "INR",
-      "createdAt": "2026-09-01T13:03:58.227Z",
-      "updatedAt": "2026-09-01T13:03:58.227Z"
-    }
-  ],
-  "adminPasswordHash": "699f9871af3b77e60a6942b651d213a546b4ea7ec1d7d381fceee0d4888df158"
+  "budgets": []
 }
