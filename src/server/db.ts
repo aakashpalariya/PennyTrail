@@ -198,22 +198,50 @@ function mapBudget(row: Row): DBBudget {
 // ─── PennyTrail SQLite Database Engine ──────────────────────────────────────
 
 export class PennyTrailSQLiteDB {
-  private client: Client;
+  private client!: Client;
+  private currentUrl: string = '';
+  private currentAuthToken?: string;
   private initPromise: Promise<void> | null = null;
   private paths: { dataDir: string; sqliteDbPath: string; jsonFilePath: string };
 
   constructor() {
     this.paths = getDataPaths();
-    if (!fs.existsSync(this.paths.dataDir)) {
-      fs.mkdirSync(this.paths.dataDir, { recursive: true });
+    this.ensureClient();
+  }
+
+  private ensureClient(): Client {
+    const tursoUrl = (process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL || '').trim();
+    const tursoAuthToken = (process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN || '').trim();
+    const targetUrl = tursoUrl || `file:${this.paths.sqliteDbPath}`;
+
+    if (!this.client || this.currentUrl !== targetUrl || this.currentAuthToken !== tursoAuthToken) {
+      if (tursoUrl) {
+        this.client = createClient({
+          url: tursoUrl,
+          authToken: tursoAuthToken || undefined,
+        });
+      } else {
+        if (!fs.existsSync(this.paths.dataDir)) {
+          try {
+            fs.mkdirSync(this.paths.dataDir, { recursive: true });
+          } catch {
+            // Ignore directory creation failure in read-only / serverless environment
+          }
+        }
+        this.client = createClient({
+          url: `file:${this.paths.sqliteDbPath}`,
+        });
+      }
+      this.currentUrl = targetUrl;
+      this.currentAuthToken = tursoAuthToken;
+      this.initPromise = null;
     }
-    this.client = createClient({
-      url: `file:${this.paths.sqliteDbPath}`,
-    });
+    return this.client;
   }
 
   // Ensure DB tables, indexes, and initial data migration are executed
   public async ready(): Promise<void> {
+    this.ensureClient();
     if (!this.initPromise) {
       this.initPromise = this.initializeDatabase();
     }
@@ -937,6 +965,10 @@ export class PennyTrailSQLiteDB {
   // ── Admin Security & Password ─────────────────────────────────────────────
 
   async getAdminPasswordHash(): Promise<string> {
+    const envPassword = process.env.ADMIN_PASSWORD?.trim();
+    if (envPassword) {
+      return hashPassword(envPassword);
+    }
     await this.ready();
     const res = await this.client.execute({
       sql: `SELECT value FROM system_config WHERE key = 'admin_password_hash' LIMIT 1;`,
@@ -954,6 +986,10 @@ export class PennyTrailSQLiteDB {
   }
 
   async verifyAdminPassword(password: string): Promise<boolean> {
+    const envPassword = process.env.ADMIN_PASSWORD;
+    if (envPassword !== undefined && envPassword !== '') {
+      return password === envPassword || password.trim() === envPassword.trim();
+    }
     const currentHash = await this.getAdminPasswordHash();
     return hashPassword(password) === currentHash;
   }
@@ -962,6 +998,13 @@ export class PennyTrailSQLiteDB {
     const isValid = await this.verifyAdminPassword(oldPassword);
     if (!isValid) {
       return { success: false, error: 'Current admin password is incorrect' };
+    }
+    const envPassword = process.env.ADMIN_PASSWORD?.trim();
+    if (envPassword) {
+      return {
+        success: false,
+        error: 'Admin password is configured via the ADMIN_PASSWORD environment variable in your .env file. Please update the .env file to change the admin password.',
+      };
     }
     if (!newPassword || newPassword.trim().length < 6) {
       return { success: false, error: 'New password must be at least 6 characters' };

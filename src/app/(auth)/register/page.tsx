@@ -7,6 +7,7 @@ import { Mail, Lock, User, Eye, EyeOff, Calendar } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { SUPPORTED_CURRENCIES } from '@/domain/currency';
 
@@ -102,16 +103,16 @@ export default function RegisterPage() {
             autoComplete="email"
           />
 
-          <Input
+          <DatePicker
             label="Date of Birth (Used for password reset)"
-            type="date"
             value={dob}
-            onChange={e => {
-              setDob(e.target.value);
+            onChange={val => {
+              setDob(val);
               if (errors.dob) setErrors(prev => ({ ...prev, dob: '' }));
             }}
+            placeholder="Select date of birth"
             error={errors.dob}
-            leftElement={<Calendar size={16} />}
+            required
           />
 
           <Input

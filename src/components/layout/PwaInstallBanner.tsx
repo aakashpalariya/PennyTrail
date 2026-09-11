@@ -39,12 +39,12 @@ export function PwaInstallBanner() {
       role="banner"
       aria-label="Install PennyTrail app"
       className={`
-        w-full px-4 py-3 rounded-2xl
+        w-full px-4 py-3.5 rounded-3xl block lg:hidden
         bg-emerald-600 dark:bg-emerald-700
         border border-emerald-500/60 dark:border-emerald-600/60
         shadow-lg shadow-emerald-900/15 dark:shadow-emerald-950/30
         transition-all duration-300 ease-in-out overflow-hidden
-        ${visible ? 'max-h-40 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-98 pointer-events-none'}
+        ${visible ? 'max-h-48 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-98 pointer-events-none'}
       `}
     >
       <div className="flex items-center justify-between gap-3">
@@ -54,7 +54,7 @@ export function PwaInstallBanner() {
           <img
             src="/icon-192.png"
             alt="PennyTrail"
-            className="w-10 h-10 rounded-xl shrink-0 shadow-md bg-white p-1 object-contain"
+            className="w-10 h-10 rounded-2xl shrink-0 shadow-md bg-white p-1 object-contain"
           />
           <div className="min-w-0">
             <p className="text-xs sm:text-sm font-bold text-white leading-tight">
@@ -78,16 +78,9 @@ export function PwaInstallBanner() {
             )}
 
             {/* Android device guidance */}
-            {isAndroid && (
+            {!isIos && (
               <p className="text-[11px] sm:text-xs text-emerald-100 leading-tight mt-0.5">
-                Install as a mobile app on your Android phone for quick offline access
-              </p>
-            )}
-
-            {/* Desktop device guidance */}
-            {isDesktop && (
-              <p className="text-[11px] sm:text-xs text-emerald-100 leading-tight mt-0.5">
-                Install on your computer for quick access and offline tracking
+                Install as a mobile app for quick offline expense tracking
               </p>
             )}
           </div>

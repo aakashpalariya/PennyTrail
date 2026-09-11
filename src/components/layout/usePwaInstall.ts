@@ -59,6 +59,7 @@ export function usePwaInstall(): UsePwaInstallReturn {
   const [isIos, setIsIos] = useState<boolean>(false);
   const [isAndroid, setIsAndroid] = useState<boolean>(false);
   const [isDesktop, setIsDesktop] = useState<boolean>(true);
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
 
   // Detect device type on client mount
@@ -71,7 +72,15 @@ export function usePwaInstall(): UsePwaInstallReturn {
     setIsAndroid(android);
     setIsDesktop(desktop);
     setDeviceType(ios ? 'ios' : android ? 'android' : 'desktop');
+
+    const checkViewport = () => {
+      setIsMobileViewport(typeof window !== 'undefined' && window.innerWidth < 1024);
+    };
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+
     setIsReady(true);
+    return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
   // Detect if already running as installed PWA in standalone mode
@@ -121,10 +130,12 @@ export function usePwaInstall(): UsePwaInstallReturn {
 
   const canInstall = !!deferredPrompt;
 
-  // Visibility logic based on device type:
+  // Visibility logic:
+  // ONLY show in mobile view (screen width < 1024 or mobile device):
   // - iOS: Visible until bookmarked / added to home screen (standalone mode)
-  // - Android / Desktop: Visible until installed when the install prompt is available
-  const showBanner = isReady && !installed && (isIos || canInstall);
+  // - Android / Mobile: Visible until installed when the install prompt is available
+  const isMobile = isIos || isAndroid || isMobileViewport;
+  const showBanner = isReady && !installed && isMobile && (isIos || canInstall);
 
   return {
     deviceType,

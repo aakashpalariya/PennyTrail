@@ -7,6 +7,7 @@ import { Mail, Calendar, Lock, Eye, EyeOff, KeyRound, ArrowLeft, CheckCircle2 } 
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -133,16 +134,16 @@ export default function ForgotPasswordPage() {
                 autoComplete="email"
               />
 
-              <Input
+              <DatePicker
                 label="Date of Birth (Security verification)"
-                type="date"
                 value={dob}
-                onChange={e => {
-                  setDob(e.target.value);
+                onChange={val => {
+                  setDob(val);
                   if (errors.dob) setErrors(prev => ({ ...prev, dob: '' }));
                 }}
+                placeholder="Select date of birth"
                 error={errors.dob}
-                leftElement={<Calendar size={16} />}
+                required
               />
 
               <Input

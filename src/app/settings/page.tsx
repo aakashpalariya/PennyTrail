@@ -29,6 +29,7 @@ import { CustomSelect } from '@/components/ui/CustomSelect';
 import { Avatar } from '@/components/ui/Avatar';
 import { AvatarPickerModal } from '@/components/ui/AvatarPickerModal';
 import { PageHeader } from '@/components/ui/Primitives';
+import { PwaInstallBanner } from '@/components/layout/PwaInstallBanner';
 import { SUPPORTED_CURRENCIES } from '@/domain/currency';
 
 export default function SettingsPage() {
@@ -169,6 +170,9 @@ export default function SettingsPage() {
         title="Settings"
         subtitle="Manage your profile, display preferences, and account security"
       />
+
+      {/* PWA Install Banner — Mobile view only */}
+      <PwaInstallBanner />
 
       {/* Profile Card */}
       <section className="glass-card rounded-3xl p-5 sm:p-6 flex flex-col gap-5 border border-neutral-200/80 dark:border-neutral-800 shadow-sm">

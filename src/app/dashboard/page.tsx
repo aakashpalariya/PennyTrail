@@ -22,7 +22,6 @@ import { apiClient, type Category, type Expense } from '@/lib/api';
 import { formatAmount, formatAmountCompact } from '@/domain/currency';
 import { formatDate, currentMonth, currentDate } from '@/domain/formatters';
 import { LoadingSpinner, PageHeader, StatCard } from '@/components/ui/Primitives';
-import { PwaInstallBanner } from '@/components/layout/PwaInstallBanner';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, CartesianGrid,
@@ -166,9 +165,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-5 animate-fade-in pb-16 sm:pb-8">
-      {/* PWA Install Banner — Always visible until app is installed/bookmarked */}
-      <PwaInstallBanner />
-
       {/* Unified Page Header */}
       <PageHeader
         title="Dashboard"

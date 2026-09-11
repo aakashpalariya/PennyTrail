@@ -35,6 +35,7 @@ import { formatDate, formatDobDisplay } from '@/domain/formatters';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Modal } from '@/components/ui/Modal';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { LoadingSpinner } from '@/components/ui/Primitives';
@@ -151,6 +152,7 @@ export default function AdminPage() {
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
   const [isChangingAdminPassword, setIsChangingAdminPassword] = useState(false);
+  const [isPasswordEnvManaged, setIsPasswordEnvManaged] = useState(false);
 
   // Check existing session
   useEffect(() => {
@@ -158,18 +160,21 @@ export default function AdminPage() {
     setIsAdminAuthenticated(isAuth);
   }, []);
 
-  // Fetch all admin data (Users + Default Categories)
+  // Fetch all admin data (Users + Default Categories + Security Info)
   const loadAdminData = useCallback(async () => {
     setIsLoadingData(true);
     try {
-      const [usersRes, categoriesRes] = await Promise.all([
+      const [usersRes, categoriesRes, passwordRes] = await Promise.all([
         fetch('/api/admin/users'),
         fetch('/api/admin/categories'),
+        fetch('/api/admin/password'),
       ]);
       const usersJson = await usersRes.json();
       const categoriesJson = await categoriesRes.json();
+      const passwordJson = await passwordRes.json().catch(() => ({}));
       setUsers(usersJson.users ?? []);
       setCategories(categoriesJson.categories ?? []);
+      setIsPasswordEnvManaged(Boolean(passwordJson.isEnvManaged));
     } catch {
       showToast('Failed to load admin data', 'error');
     } finally {
@@ -990,45 +995,64 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <form onSubmit={handleChangeAdminPassword} className="flex flex-col gap-4">
-              <Input
-                label="Current Admin Password"
-                type="password"
-                placeholder="Enter current password..."
-                value={currentAdminPassword}
-                onChange={e => setCurrentAdminPassword(e.target.value)}
-              />
+            {isPasswordEnvManaged ? (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-3">
+                <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
+                    Password Managed via Environment Variable
+                  </p>
+                  <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                    The admin login password is controlled by the <code className="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 font-mono text-emerald-600 dark:text-emerald-400 font-bold">ADMIN_PASSWORD</code> variable in your <code className="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 font-mono">.env</code> / <code className="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 font-mono">.env.local</code> file.
+                  </p>
+                  <p className="text-neutral-500 dark:text-neutral-400 text-[11px] mt-1">
+                    To change the admin password, simply edit <code className="font-mono">ADMIN_PASSWORD</code> in your environment file.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleChangeAdminPassword} className="flex flex-col gap-4">
+                <Input
+                  label="Current Admin Password"
+                  type="password"
+                  placeholder="Enter current password..."
+                  value={currentAdminPassword}
+                  onChange={e => setCurrentAdminPassword(e.target.value)}
+                />
 
-              <Input
-                label="New Admin Password"
-                type="password"
-                placeholder="Minimum 6 characters..."
-                value={newAdminPassword}
-                onChange={e => setNewAdminPassword(e.target.value)}
-              />
+                <Input
+                  label="New Admin Password"
+                  type="password"
+                  placeholder="Minimum 6 characters..."
+                  value={newAdminPassword}
+                  onChange={e => setNewAdminPassword(e.target.value)}
+                />
 
-              <Input
-                label="Confirm New Password"
-                type="password"
-                placeholder="Confirm new password..."
-                value={confirmAdminPassword}
-                onChange={e => setConfirmAdminPassword(e.target.value)}
-              />
+                <Input
+                  label="Confirm New Password"
+                  type="password"
+                  placeholder="Confirm new password..."
+                  value={confirmAdminPassword}
+                  onChange={e => setConfirmAdminPassword(e.target.value)}
+                />
 
-              <Button
-                type="submit"
-                size="md"
-                isLoading={isChangingAdminPassword}
-                className="mt-2 bg-emerald-600 hover:bg-emerald-700"
-              >
-                Update Admin Password
-              </Button>
-            </form>
+                <Button
+                  type="submit"
+                  size="md"
+                  isLoading={isChangingAdminPassword}
+                  className="mt-2 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Update Admin Password
+                </Button>
+              </form>
+            )}
 
             <div className="p-3.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200/60 dark:border-neutral-700/60 text-xs text-neutral-600 dark:text-neutral-400 flex items-start gap-2">
               <CheckCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
               <span>
-                Make sure to store your new password safely. If forgotten, it can also be reset from the server environment.
+                {isPasswordEnvManaged
+                  ? 'Whatever password is set in the environment file will be used for administrator login.'
+                  : 'Make sure to store your new password safely. If forgotten, it can also be reset from the server environment.'}
               </span>
             </div>
           </div>
@@ -1103,11 +1127,10 @@ export default function AdminPage() {
             error={editErrors.email}
           />
 
-          <Input
+          <DatePicker
             label="Date of Birth"
-            type="date"
             value={editDob}
-            onChange={e => setEditDob(e.target.value)}
+            onChange={setEditDob}
           />
 
           <div>
@@ -1200,11 +1223,10 @@ export default function AdminPage() {
             required
           />
 
-          <Input
+          <DatePicker
             label="Date of Birth"
-            type="date"
             value={addDob}
-            onChange={e => setAddDob(e.target.value)}
+            onChange={setAddDob}
             required
           />
 

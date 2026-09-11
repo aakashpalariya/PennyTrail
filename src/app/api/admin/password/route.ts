@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { serverDb } from '@/server/db';
 
+// GET /api/admin/password — check if admin password is env-managed
+export async function GET() {
+  const isEnvManaged = Boolean(process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim());
+  return NextResponse.json({ isEnvManaged });
+}
+
 // POST /api/admin/password — change admin password
 export async function POST(req: NextRequest) {
   try {
